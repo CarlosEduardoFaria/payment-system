@@ -1,0 +1,19 @@
+services:
+
+  sonarqube:
+    container_name: sonarqube
+    image: sonarqube:community
+    restart: always
+
+    ports:
+      - "9000:9000"
+
+    volumes:
+      - sonarqube_data:/opt/sonarqube/data
+      - sonarqube_logs:/opt/sonarqube/logs
+
+volumes:
+  sonarqube_data:
+    driver: local
+  sonarqube_logs:
+    driver: local
