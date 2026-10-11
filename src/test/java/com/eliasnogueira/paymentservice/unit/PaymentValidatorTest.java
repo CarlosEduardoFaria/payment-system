@@ -23,6 +23,7 @@
  */
 package com.eliasnogueira.paymentservice.unit;
 
+import com.eliasnogueira.paymentservice.exceptions.PaymentLimitException;
 import com.eliasnogueira.paymentservice.validator.PaymentLimitValidator;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -31,6 +32,7 @@ import java.math.BigDecimal;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class PaymentValidatorTest {
 
@@ -55,9 +57,23 @@ class PaymentValidatorTest {
 
     static Stream<BigDecimal> edgeCasesForLimit() {
         return Stream.of(
-                new BigDecimal("00.0"),
                 new BigDecimal("2000.01"),
                 new BigDecimal("3500.00"));
+    }
+
+    @ParameterizedTest(name = "Payment should throw PaymentException when amount is {0}")
+    @MethodSource("negativeCasesForLimit")
+    void negativeCases(BigDecimal amount) {
+        assertThatThrownBy(() -> PaymentLimitValidator.isWithinLimit(amount))
+                .isInstanceOf(PaymentLimitException.class)
+                .hasMessageContaining("Amount must be greater than zero");
+    }
+
+    static Stream<BigDecimal> negativeCasesForLimit() {
+        return Stream.of(
+                new BigDecimal("-5.00"),
+                new BigDecimal("00.0"),
+                new BigDecimal("0"));
     }
 }
 

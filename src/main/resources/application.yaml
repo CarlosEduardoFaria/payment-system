@@ -2,6 +2,7 @@ spring:
   application:
     name: payment-service
   datasource:
+    name: PAYMENT-DATABASE
     url: jdbc:h2:mem:payments
     driver-class-name: org.h2.Driver
     username: sa

@@ -3,12 +3,16 @@ package com.eliasnogueira.paymentservice.unit;
 import com.eliasnogueira.paymentservice.data.PaymentDataFactory;
 import com.eliasnogueira.paymentservice.dto.PaymentRequest;
 import com.eliasnogueira.paymentservice.exceptions.PaymentLimitException;
+import com.eliasnogueira.paymentservice.model.Payment;
 import com.eliasnogueira.paymentservice.model.enums.PaymentSource;
+import com.eliasnogueira.paymentservice.model.enums.PaymentStatus;
 import com.eliasnogueira.paymentservice.repository.PaymentRepository;
 import com.eliasnogueira.paymentservice.service.PaymentService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -59,5 +63,23 @@ class PaymentServiceTest {
         assertThatThrownBy(() -> paymentService.createPayment(paymentRequest))
                 .isInstanceOf(PaymentLimitException.class)
                 .hasMessageContaining("Daily payment limit exceeded");
+    }
+
+    @ParameterizedTest(name = "Should thrown an exception when amount {0}")
+    @ValueSource(strings = {"0.00", "-100.99"})
+    @DisplayName("Should thrown an exception when amount is less or equal than zero")
+    void shouldThrownExceptionWhenAmountIsLessOrEqualZero(BigDecimal amount) {
+        var paymentRequest = PaymentRequest.builder()
+                .payerId(UUID.randomUUID())
+                .paymentSource(PaymentSource.DEBIT_CARD)
+                .amount(amount)
+                .build();
+
+        when(paymentRepository.sumPaymentsByPayerIdAndDate(any(), any(), any()))
+                .thenReturn(paymentRequest.getAmount());
+
+        assertThatThrownBy(() -> paymentService.createPayment(paymentRequest))
+                .isInstanceOf(PaymentLimitException.class)
+                .hasMessageContaining("Amount must be greater than zero");
     }
 }

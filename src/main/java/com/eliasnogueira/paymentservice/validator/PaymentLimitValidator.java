@@ -1,5 +1,7 @@
 package com.eliasnogueira.paymentservice.validator;
 
+import com.eliasnogueira.paymentservice.exceptions.PaymentLimitException;
+
 import java.math.BigDecimal;
 
 public final class PaymentLimitValidator {
@@ -12,7 +14,7 @@ public final class PaymentLimitValidator {
         if (amount == null) return false;
 
         if (amount.compareTo(BigDecimal.ZERO) <= 0) {
-            return false;
+            throw new PaymentLimitException("Amount must be greater than zero");
         }
 
         return amount.compareTo(MAX_LIMIT) <= 0;
